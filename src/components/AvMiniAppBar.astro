@@ -1,0 +1,26 @@
+---
+import { AvContainer } from "@ansiversa/components";
+
+interface Props {
+  appId: string;
+  appName: string;
+  logoPath?: string;
+}
+
+const { appId, appName, logoPath = "/favicon.svg" } = Astro.props;
+---
+
+<header class="border-b border-white/10 bg-slate-950/80 backdrop-blur">
+  <AvContainer>
+    <div class="flex items-center justify-between py-4">
+      <a href="/app" class="flex items-center gap-3 text-white">
+        <img src={logoPath} alt={`${appName} logo`} class="h-8 w-8 rounded-md" />
+        <div>
+          <p class="text-xs uppercase tracking-[0.22em] text-slate-400">{appId}</p>
+          <p class="text-sm font-semibold">{appName}</p>
+        </div>
+      </a>
+      <a href={Astro.locals.rootAppUrl ?? "https://ansiversa.com"} class="text-sm text-slate-300 hover:text-white">Ansiversa Dashboard</a>
+    </div>
+  </AvContainer>
+</header>

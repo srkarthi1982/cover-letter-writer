@@ -1,0 +1,172 @@
+---
+import AppShell from "../layouts/AppShell.astro";
+import AvMiniAppBar from "../components/AvMiniAppBar.astro";
+import { AvContainer } from "@ansiversa/components";
+import {
+  archiveCoverLetterForUser,
+  createCoverLetterForUser,
+  listCoverLettersForUser,
+  restoreCoverLetterForUser,
+  toggleCoverLetterFavoriteForUser,
+  updateCoverLetterForUser,
+} from "../lib/coverLetters";
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect("/");
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const intent = String(formData.get("intent") ?? "");
+  const id = String(formData.get("id") ?? "");
+
+  if (intent === "create") {
+    await createCoverLetterForUser(user.id, {
+      title: String(formData.get("title") ?? ""),
+      jobTitle: String(formData.get("jobTitle") ?? ""),
+      companyName: String(formData.get("companyName") ?? ""),
+      recipientName: String(formData.get("recipientName") ?? ""),
+      introText: String(formData.get("introText") ?? ""),
+      bodyText: String(formData.get("bodyText") ?? ""),
+      closingText: String(formData.get("closingText") ?? ""),
+      notes: String(formData.get("notes") ?? ""),
+      status: (String(formData.get("status") ?? "draft") as "draft" | "ready" | "archived"),
+    });
+  }
+
+  if (intent === "toggleFavorite" && id) await toggleCoverLetterFavoriteForUser(user.id, id);
+  if (intent === "archive" && id) await archiveCoverLetterForUser(user.id, id);
+  if (intent === "restore" && id) await restoreCoverLetterForUser(user.id, id);
+  if (intent === "markReady" && id) await updateCoverLetterForUser(user.id, id, { status: "ready" });
+
+  return Astro.redirect("/app");
+}
+
+const letters = await listCoverLettersForUser(user.id);
+const now = Date.now();
+const lastSevenDays = 7 * 24 * 60 * 60 * 1000;
+
+const summary = {
+  total: letters.length,
+  drafts: letters.filter((letter) => letter.status === "draft").length,
+  ready: letters.filter((letter) => letter.status === "ready").length,
+  favorites: letters.filter((letter) => letter.isFavorite).length,
+  archived: letters.filter((letter) => letter.status === "archived").length,
+  recentlyUpdated: letters.filter((letter) => now - new Date(letter.updatedAt).getTime() <= lastSevenDays).length,
+};
+---
+
+<AppShell title="Cover Letter Workspace" description="Manual cover letter drafting workspace.">
+  <AvMiniAppBar appId="cover-letter-writer" appName="Cover Letter Writer" />
+  <main class="py-10" x-data x-init={`$store.coverLetters.init(${JSON.stringify({ letters })})`}>
+    <AvContainer>
+      <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-semibold text-white">Your cover letters</h1>
+          <p class="mt-2 text-sm text-slate-300">Create, edit, favorite, and archive letters without losing history.</p>
+        </div>
+        <button class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-emerald-400" @click="$store.coverLetters.openDrawer()">New cover letter</button>
+      </div>
+
+      <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        {Object.entries(summary).map(([label, value]) => (
+          <article class="rounded-xl border border-white/10 bg-slate-900/60 p-4">
+            <p class="text-xs uppercase tracking-wide text-slate-400">{label}</p>
+            <p class="mt-1 text-2xl font-semibold text-white">{value}</p>
+          </article>
+        ))}
+      </section>
+
+      <section class="mt-8 rounded-2xl border border-white/10 bg-slate-900/60 p-4 md:p-6">
+        <div class="mb-5 flex flex-wrap gap-2">
+          <button class="rounded-md px-3 py-1 text-sm" :class="$store.coverLetters.activeTab === 'overview' ? 'bg-white text-slate-900' : 'bg-slate-800 text-slate-200'" @click="$store.coverLetters.setTab('overview')">Overview</button>
+          <button class="rounded-md px-3 py-1 text-sm" :class="$store.coverLetters.activeTab === 'letters' ? 'bg-white text-slate-900' : 'bg-slate-800 text-slate-200'" @click="$store.coverLetters.setTab('letters')">Letters</button>
+          <button class="rounded-md px-3 py-1 text-sm" :class="$store.coverLetters.activeTab === 'favorites' ? 'bg-white text-slate-900' : 'bg-slate-800 text-slate-200'" @click="$store.coverLetters.setTab('favorites')">Favorites</button>
+          <button class="rounded-md px-3 py-1 text-sm" :class="$store.coverLetters.activeTab === 'archived' ? 'bg-white text-slate-900' : 'bg-slate-800 text-slate-200'" @click="$store.coverLetters.setTab('archived')">Archived</button>
+        </div>
+
+        <div class="mb-5 flex flex-wrap gap-3">
+          <input x-model="$store.coverLetters.search" type="search" placeholder="Search by title, role, company, recipient" class="min-w-72 flex-1 rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+          <select x-model="$store.coverLetters.statusFilter" class="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white">
+            <option value="all">All statuses</option>
+            <option value="draft">Draft</option>
+            <option value="ready">Ready</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
+        <div class="space-y-3" x-show="$store.coverLetters.filteredLetters().length">
+          <template x-for="letter in $store.coverLetters.filteredLetters()" :key="letter.id">
+            <article class="rounded-xl border border-white/10 bg-slate-950/70 p-4">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <a :href="`/app/letters/${letter.id}`" class="text-lg font-medium text-white hover:text-emerald-300" x-text="letter.title"></a>
+                  <p class="mt-1 text-sm text-slate-400" x-text="[letter.jobTitle, letter.companyName].filter(Boolean).join(' · ') || 'No role/company yet'"></p>
+                  <p class="text-xs text-slate-500" x-text="`Updated ${new Date(letter.updatedAt).toLocaleDateString()}`"></p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-300" x-text="letter.status"></span>
+                  <form method="POST" class="inline">
+                    <input type="hidden" name="intent" value="toggleFavorite" />
+                    <input type="hidden" name="id" :value="letter.id" />
+                    <button class="rounded-md border border-white/15 px-2 py-1 text-xs text-white" type="submit" x-text="letter.isFavorite ? '★ Favorite' : '☆ Favorite'"></button>
+                  </form>
+                </div>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <form method="POST" class="inline" x-show="letter.status !== 'ready' && letter.status !== 'archived'">
+                  <input type="hidden" name="intent" value="markReady" />
+                  <input type="hidden" name="id" :value="letter.id" />
+                  <button type="submit" class="rounded-md border border-emerald-400/40 px-2 py-1 text-xs text-emerald-200">Mark ready</button>
+                </form>
+                <form method="POST" class="inline" x-show="letter.status !== 'archived'">
+                  <input type="hidden" name="intent" value="archive" />
+                  <input type="hidden" name="id" :value="letter.id" />
+                  <button type="submit" class="rounded-md border border-white/15 px-2 py-1 text-xs text-slate-300">Archive</button>
+                </form>
+                <form method="POST" class="inline" x-show="letter.status === 'archived'">
+                  <input type="hidden" name="intent" value="restore" />
+                  <input type="hidden" name="id" :value="letter.id" />
+                  <button type="submit" class="rounded-md border border-white/15 px-2 py-1 text-xs text-slate-300">Restore</button>
+                </form>
+              </div>
+            </article>
+          </template>
+        </div>
+
+        <div x-show="!$store.coverLetters.filteredLetters().length" class="rounded-xl border border-dashed border-white/15 p-8 text-center text-slate-300">
+          No cover letters match your current filters.
+        </div>
+      </section>
+    </AvContainer>
+
+    <div x-show="$store.coverLetters.isDrawerOpen" x-cloak class="fixed inset-0 z-40 bg-black/60 p-4" @click.self="$store.coverLetters.closeDrawer()">
+      <div class="ml-auto h-full w-full max-w-2xl overflow-y-auto rounded-xl border border-white/10 bg-slate-900 p-6">
+        <div class="mb-5 flex items-center justify-between">
+          <h2 class="text-xl font-semibold text-white">Create cover letter</h2>
+          <button class="text-slate-400 hover:text-white" @click="$store.coverLetters.closeDrawer()">Close</button>
+        </div>
+        <form method="POST" class="space-y-4">
+          <input type="hidden" name="intent" value="create" />
+          <input required name="title" placeholder="Letter title" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+          <div class="grid gap-3 sm:grid-cols-2">
+            <input name="jobTitle" placeholder="Job title" class="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+            <input name="companyName" placeholder="Company" class="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+          </div>
+          <input name="recipientName" placeholder="Recipient (optional)" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+          <textarea name="introText" rows="3" placeholder="Intro paragraph" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white"></textarea>
+          <textarea required name="bodyText" rows="8" placeholder="Main cover letter body" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white"></textarea>
+          <textarea name="closingText" rows="3" placeholder="Closing paragraph" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white"></textarea>
+          <textarea name="notes" rows="3" placeholder="Private notes" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white"></textarea>
+          <select name="status" class="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white">
+            <option value="draft">Draft</option>
+            <option value="ready">Ready</option>
+          </select>
+          <div class="flex justify-end gap-2">
+            <button type="button" class="rounded-lg border border-white/15 px-4 py-2 text-sm text-slate-200" @click="$store.coverLetters.closeDrawer()">Cancel</button>
+            <button class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950">Save letter</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</AppShell>
