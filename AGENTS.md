@@ -26,5 +26,6 @@ MANDATORY: After completing each task, update this repo’s AGENTS.md Task Log (
 
 ## Task Log (Recent)
 - Keep newest first; include date and short summary.
+- 2026-03-25 Implemented full V1 manual workspace (Astro DB schema + ownership-safe CRUD/actions + /app and /app/letters/[id] UX + middleware scoping + dashboard/notification webhooks). Validation: `npm run build` passed; `npm run typecheck` blocked by restricted install of `@astrojs/check`.
 - 2026-02-09 Added repo-level AGENTS.md enforcement contract (workspace reference + mandatory task-log update rule).
 - 2026-02-09 Initialized repo AGENTS baseline for single-repo Codex/AI safety.

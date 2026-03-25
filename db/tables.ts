@@ -5,33 +5,29 @@ export const CoverLetters = defineTable({
     id: column.text({ primaryKey: true }),
     userId: column.text(),
     title: column.text(),
-    jobTitle: column.text(),
+    jobTitle: column.text({ optional: true }),
     companyName: column.text({ optional: true }),
-    jobDescription: column.text({ optional: true }),
-    tone: column.text({ optional: true }),
-    language: column.text({ optional: true }),
-    content: column.text(),
-    status: column.text({ optional: true }),
+    recipientName: column.text({ optional: true }),
+    introText: column.text({ optional: true }),
+    bodyText: column.text(),
+    closingText: column.text({ optional: true }),
+    notes: column.text({ optional: true }),
+    isFavorite: column.boolean({ default: false }),
+    status: column.text({ default: "draft" }),
     createdAt: column.date({ default: NOW }),
     updatedAt: column.date({ default: NOW }),
+    archivedAt: column.date({ optional: true }),
   },
-});
-
-export const CoverLetterTemplates = defineTable({
-  columns: {
-    id: column.text({ primaryKey: true }),
-    userId: column.text({ optional: true }), // null → system template
-    name: column.text(),
-    description: column.text({ optional: true }),
-    tone: column.text({ optional: true }),
-    language: column.text({ optional: true }),
-    body: column.text(),
-    isSystem: column.boolean({ default: false }),
-    createdAt: column.date({ default: NOW }),
-  },
+  indexes: [
+    { on: ["userId"] },
+    { on: ["userId", "status"] },
+    { on: ["userId", "isFavorite"] },
+    { on: ["userId", "companyName"] },
+    { on: ["userId", "jobTitle"] },
+    { on: ["userId", "updatedAt"] },
+  ],
 });
 
 export const tables = {
   CoverLetters,
-  CoverLetterTemplates,
 } as const;

@@ -21,6 +21,12 @@ interface ImportMetaEnv {
 
   /** Optional: Override the root app URL (fallback: https://ansiversa.com) */
   readonly PUBLIC_ROOT_APP_URL?: string;
+
+  /** Optional dashboard summary webhook URL for parent app integration */
+  readonly ANSIVERSA_DASHBOARD_WEBHOOK_URL?: string;
+
+  /** Optional notifications webhook URL for high-signal events */
+  readonly ANSIVERSA_NOTIFICATIONS_WEBHOOK_URL?: string;
 }
 
 interface Window {

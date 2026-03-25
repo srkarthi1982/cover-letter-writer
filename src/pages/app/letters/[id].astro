@@ -1,0 +1,107 @@
+---
+import AppShell from "../../../layouts/AppShell.astro";
+import AvMiniAppBar from "../../../components/AvMiniAppBar.astro";
+import { AvContainer } from "@ansiversa/components";
+import {
+  archiveCoverLetterForUser,
+  getCoverLetterDetailForUser,
+  restoreCoverLetterForUser,
+  toggleCoverLetterFavoriteForUser,
+  updateCoverLetterForUser,
+} from "../../../lib/coverLetters";
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect("/");
+
+const id = Astro.params.id as string;
+if (!id) throw new Error("Missing letter id");
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const intent = String(formData.get("intent") ?? "");
+
+  if (intent === "update") {
+    await updateCoverLetterForUser(user.id, id, {
+      title: String(formData.get("title") ?? ""),
+      jobTitle: String(formData.get("jobTitle") ?? ""),
+      companyName: String(formData.get("companyName") ?? ""),
+      recipientName: String(formData.get("recipientName") ?? ""),
+      introText: String(formData.get("introText") ?? ""),
+      bodyText: String(formData.get("bodyText") ?? ""),
+      closingText: String(formData.get("closingText") ?? ""),
+      notes: String(formData.get("notes") ?? ""),
+      status: String(formData.get("status") ?? "draft") as "draft" | "ready" | "archived",
+    });
+  }
+
+  if (intent === "archive") await archiveCoverLetterForUser(user.id, id);
+  if (intent === "restore") await restoreCoverLetterForUser(user.id, id);
+  if (intent === "toggleFavorite") await toggleCoverLetterFavoriteForUser(user.id, id);
+
+  return Astro.redirect(`/app/letters/${id}`);
+}
+
+const letter = await getCoverLetterDetailForUser(user.id, id);
+---
+
+<AppShell title={`${letter.title} | Cover Letter`} description="Cover letter detail">
+  <AvMiniAppBar appId="cover-letter-writer" appName="Cover Letter Writer" />
+  <main class="py-10">
+    <AvContainer>
+      <a href="/app" class="text-sm text-slate-300 hover:text-white">← Back to workspace</a>
+      <header class="mt-4 rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 class="text-3xl font-semibold text-white">{letter.title}</h1>
+            <p class="mt-2 text-sm text-slate-300">{[letter.jobTitle, letter.companyName, letter.recipientName].filter(Boolean).join(" · ") || "Metadata not fully set"}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-300">{letter.status}</span>
+            <form method="POST">
+              <input type="hidden" name="intent" value="toggleFavorite" />
+              <button class="rounded-md border border-white/15 px-2 py-1 text-xs text-white">{letter.isFavorite ? "★ Favorite" : "☆ Favorite"}</button>
+            </form>
+            {letter.status === "archived" ? (
+              <form method="POST"><input type="hidden" name="intent" value="restore" /><button class="rounded-md border border-white/15 px-2 py-1 text-xs text-slate-200">Restore</button></form>
+            ) : (
+              <form method="POST"><input type="hidden" name="intent" value="archive" /><button class="rounded-md border border-white/15 px-2 py-1 text-xs text-slate-200">Archive</button></form>
+            )}
+          </div>
+        </div>
+        <p class="mt-4 text-xs text-slate-500">Created {new Date(letter.createdAt).toLocaleString()} · Updated {new Date(letter.updatedAt).toLocaleString()}</p>
+      </header>
+
+      <section class="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+        <h2 class="mb-4 text-lg font-semibold text-white">Edit letter</h2>
+        <form method="POST" class="space-y-4">
+          <input type="hidden" name="intent" value="update" />
+          <input required name="title" value={letter.title} class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+          <div class="grid gap-3 sm:grid-cols-3">
+            <input name="jobTitle" value={letter.jobTitle ?? ""} placeholder="Job title" class="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+            <input name="companyName" value={letter.companyName ?? ""} placeholder="Company" class="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+            <input name="recipientName" value={letter.recipientName ?? ""} placeholder="Recipient" class="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white" />
+          </div>
+          <textarea name="introText" rows="3" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white">{letter.introText ?? ""}</textarea>
+          <textarea name="bodyText" rows="10" required class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white">{letter.bodyText}</textarea>
+          <textarea name="closingText" rows="3" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white">{letter.closingText ?? ""}</textarea>
+          <textarea name="notes" rows="4" class="w-full rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white">{letter.notes ?? ""}</textarea>
+          <select name="status" class="rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white">
+            <option value="draft" selected={letter.status === "draft"}>Draft</option>
+            <option value="ready" selected={letter.status === "ready"}>Ready</option>
+            <option value="archived" selected={letter.status === "archived"}>Archived</option>
+          </select>
+          <button class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950">Save changes</button>
+        </form>
+      </section>
+
+      <section class="mt-6 grid gap-4 lg:grid-cols-3">
+        <article class="rounded-xl border border-white/10 bg-slate-900/40 p-4 lg:col-span-3">
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Readable preview</h3>
+          {letter.introText && <p class="mt-3 whitespace-pre-wrap text-slate-200">{letter.introText}</p>}
+          <p class="mt-3 whitespace-pre-wrap text-slate-200">{letter.bodyText}</p>
+          {letter.closingText && <p class="mt-3 whitespace-pre-wrap text-slate-200">{letter.closingText}</p>}
+        </article>
+      </section>
+    </AvContainer>
+  </main>
+</AppShell>

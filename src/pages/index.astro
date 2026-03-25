@@ -2,91 +2,40 @@
 import AppShell from "../layouts/AppShell.astro";
 import { AvContainer, AvButton } from "@ansiversa/components";
 
-const title = "Cover Letter Writer – Ansiversa";
-const description = "Write tailored cover letters fast.";
+const title = "Cover Letter Writer — Ansiversa";
+const description = "A premium manual workspace to draft, organize, and refine job-ready cover letters.";
 ---
 
 <AppShell title={title} description={description}>
-  <!-- Hero -->
-  <section class="av-hero">
-    <AvContainer size="narrow" className="av-hero__content--narrow">
-      <div class="av-hero__content">
-        <div class="av-kicker">
-          <span>Career & Work · Ansiversa Mini App</span>
-        </div>
-        <h1 class="av-gradient-text">Cover Letter Writer</h1>
-        <p>
-          Write tailored cover letters fast.
-        </p>
-      </div>
-      <div class="av-cta-row">
-        <AvButton href="https://cover-letter-writer.ansiversa.com">Launch Cover</AvButton>
+  <section class="border-b border-white/10 bg-gradient-to-b from-slate-950 to-slate-900 py-20">
+    <AvContainer size="narrow">
+      <p class="mb-4 text-xs uppercase tracking-[0.2em] text-emerald-300/80">Career writing workspace</p>
+      <h1 class="text-4xl font-semibold text-white md:text-6xl">Write better cover letters with calm focus.</h1>
+      <p class="mt-6 max-w-2xl text-lg text-slate-300">
+        Keep every draft, refine each paragraph manually, and track your application-ready letters in one premium workspace.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <AvButton href="/app">Open workspace</AvButton>
+        <AvButton href="https://ansiversa.com" variant="ghost">Explore Ansiversa</AvButton>
       </div>
     </AvContainer>
   </section>
 
-  <!-- Problem -->
-  <section class="av-section">
+  <section class="py-16">
     <AvContainer size="narrow">
-      <div class="av-section-header">
-        <h2 class="av-section-title">The problem it solves</h2>
-        <p class="av-section-lead">
-          Career tasks like resumes, meetings, and communication often feel scattered.
-        </p>
-      </div>
-      <div class="av-section-body space-y-3 text-slate-300">
-        <p>Cover Letter Writer takes one piece of your career workflow and makes it effortless.</p>
-      </div>
-    </AvContainer>
-  </section>
-
-  <!-- Why this mini app -->
-  <section class="av-section">
-    <AvContainer size="narrow">
-      <div class="av-section-header">
-        <h2 class="av-section-title">Why Cover Letter Writer feels different</h2>
-        <p class="av-section-lead">
-          A focused mini app inside the larger Ansiversa ecosystem.
-        </p>
-      </div>
-      <div class="av-section-body">
-        <ul class="space-y-2 text-slate-300 list-disc list-inside">
-          <li>Focused on a single, real-world career task.</li>
-          <li>Gives you professional-quality output without complex tools.</li>
-          <li>Keeps everything structured, consistent, and reusable.</li>
-        </ul>
-      </div>
-    </AvContainer>
-  </section>
-
-  <!-- How it works -->
-  <section class="av-section">
-    <AvContainer size="narrow">
-      <div class="av-section-header">
-        <h2 class="av-section-title">How it works</h2>
-        <p class="av-section-lead">
-          Simple, clear steps so people can start in under a minute.
-        </p>
-      </div>
-      <ol class="av-section-body space-y-2 text-slate-300 list-decimal list-inside">
-        <li>Open Cover Letter Writer before you start your task.</li>
-        <li>Provide a few key details about your role, client, or context.</li>
-        <li>Generate polished output you can refine and use immediately.</li>
-      </ol>
-    </AvContainer>
-  </section>
-
-  <!-- Final CTA -->
-  <section class="av-section">
-    <AvContainer size="narrow">
-      <div class="av-section-header">
-        <h2 class="av-section-title">Ready to try Cover Letter Writer?</h2>
-        <p class="av-section-lead">
-          Open the app, follow the simple flow, and let it handle the heavy lifting.
-        </p>
-      </div>
-      <div class="av-cta-row">
-        <AvButton href="https://cover-letter-writer.ansiversa.com">Start with Cover</AvButton>
+      <div class="grid gap-6 md:grid-cols-3">
+        <article class="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+          <h2 class="text-lg font-medium text-white">Manual by design</h2>
+          <p class="mt-3 text-sm text-slate-300">Compose every line yourself with thoughtful structure for intro, body, closing, and notes.</p>
+        </article>
+        <article class="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+          <h2 class="text-lg font-medium text-white">Organized workflow</h2>
+          <p class="mt-3 text-sm text-slate-300">Track drafts, ready letters, favorites, and archived history with fast search and clean filters.</p>
+        </article>
+        <article class="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+          <h2 class="text-lg font-medium text-white">Built for focus</h2>
+          <p class="mt-3 text-sm text-slate-300">A clutter-free workspace aligned with Ansiversa premium standards and professional tone.</p>
+        </article>
       </div>
     </AvContainer>
   </section>
