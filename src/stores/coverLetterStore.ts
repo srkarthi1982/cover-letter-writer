@@ -43,7 +43,7 @@ export function createCoverLetterStore(): CoverLetterStoreState {
     isDrawerOpen: false,
     isSubmitting: false,
     flashMessage: null,
-    init(payload) {
+    init(payload = { letters: [] }) {
       this.letters = payload.letters ?? [];
       this.activeTab = payload.tab ?? "overview";
     },

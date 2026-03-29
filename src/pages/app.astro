@@ -44,6 +44,7 @@ if (Astro.request.method === "POST") {
 const letters = await listCoverLettersForUser(user.id);
 const now = Date.now();
 const lastSevenDays = 7 * 24 * 60 * 60 * 1000;
+const initialCoverLetterState = JSON.stringify({ letters }).replace(/</g, "\\u003c");
 
 const summary = {
   total: letters.length,
@@ -57,7 +58,22 @@ const summary = {
 
 <AppShell title="Cover Letter Workspace" description="Manual cover letter drafting workspace.">
   <AvMiniAppBar appId="cover-letter-writer" appName="Cover Letter Writer" />
-  <main class="py-10" x-data x-init={`$store.coverLetters.init(${JSON.stringify({ letters })})`}>
+  <script is:inline define:vars={{ initialCoverLetterState }}>
+    window.__coverLetterInitialState = JSON.parse(initialCoverLetterState);
+    const bootCoverLetters = () => {
+      const store = window.Alpine?.store("coverLetters");
+      if (store) {
+        store.init(window.__coverLetterInitialState);
+      }
+    };
+
+    if (window.Alpine?.store("coverLetters")) {
+      bootCoverLetters();
+    } else {
+      document.addEventListener("alpine:initialized", bootCoverLetters, { once: true });
+    }
+  </script>
+  <main class="py-10" x-data>
     <AvContainer>
       <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>

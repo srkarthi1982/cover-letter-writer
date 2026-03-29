@@ -2,6 +2,7 @@
 import AppShell from "../../../layouts/AppShell.astro";
 import AvMiniAppBar from "../../../components/AvMiniAppBar.astro";
 import { AvContainer } from "@ansiversa/components";
+import { ActionError } from "astro:actions";
 import {
   archiveCoverLetterForUser,
   getCoverLetterDetailForUser,
@@ -41,7 +42,17 @@ if (Astro.request.method === "POST") {
   return Astro.redirect(`/app/letters/${id}`);
 }
 
-const letter = await getCoverLetterDetailForUser(user.id, id);
+let letter;
+
+try {
+  letter = await getCoverLetterDetailForUser(user.id, id);
+} catch (error) {
+  if (error instanceof ActionError && error.code === "NOT_FOUND") {
+    return Astro.redirect("/app");
+  }
+
+  throw error;
+}
 ---
 
 <AppShell title={`${letter.title} | Cover Letter`} description="Cover letter detail">
