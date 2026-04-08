@@ -1,42 +1,157 @@
 ---
 import AppShell from "../layouts/AppShell.astro";
-import { AvContainer, AvButton } from "@ansiversa/components";
+import LandingPageStandard from "../components/landing/LandingPageStandard.astro";
+import type { LandingPageContent } from "../lib/landing";
 
 const title = "Cover Letter Writer — Ansiversa";
 const description = "A premium manual workspace to draft, organize, and refine job-ready cover letters.";
+const rootAppUrl = Astro.locals.rootAppUrl ?? "https://ansiversa.com";
+const appUrl = new URL("/app", Astro.url).toString();
+const signInUrl = new URL("/login", rootAppUrl);
+signInUrl.searchParams.set("returnTo", appUrl);
+const startHref = Astro.locals.isAuthenticated ? "/app" : signInUrl.toString();
+
+const landingContent: LandingPageContent = {
+  categoryLabel: "Career Writing",
+  appLabel: "Authenticated DB-backed workspace",
+  title: "Keep your cover letters organized instead of rewriting every application from scratch.",
+  subtitle:
+    "Create personal cover letter drafts, edit them over time, mark the strongest versions, and archive older letters without losing the record.",
+  heroBullets: [
+    "Save cover letter drafts with the role, company, body copy, and notes that matter on revisit",
+    "Use search, favorite state, and archive state to separate active applications from older draft history",
+    "Open the full detail route when you need the complete letter instead of a short workspace summary",
+  ],
+  primaryCta: {
+    label: Astro.locals.isAuthenticated ? "Open Workspace" : "Sign in to Open",
+    href: startHref,
+  },
+  secondaryCta: {
+    label: "See Workflow",
+    href: "#workflow",
+    variant: "ghost",
+  },
+  heroNote:
+    "Current V1 is a manual cover letter workspace. It does not generate letters automatically and it is not a job platform.",
+  heroPanel: {
+    eyebrow: "Letter flow",
+    title: "Draft → Refine → Reuse",
+    steps: [
+      "1. Save a letter draft for a role or company",
+      "2. Edit, favorite, or archive it as the application evolves",
+      "3. Return to the detail view when you need the full draft again",
+    ],
+    meta: [
+      { value: "DB", label: "Persistence" },
+      { value: "Per-user", label: "Ownership" },
+    ],
+  },
+  features: {
+    title: "What Cover Letter Writer gives you in V1",
+    lead:
+      "The value is in maintaining a personal drafting workspace with state and structure, not in automating applications or generating hiring outreach.",
+    items: [
+      {
+        title: "Structured draft records",
+        description:
+          "Keep each cover letter as its own record with role context, letter body, and notes you can revisit later.",
+      },
+      {
+        title: "Favorite and archive states",
+        description:
+          "Highlight the most important letters and move older drafts out of the active workspace without deleting them.",
+      },
+      {
+        title: "Detail route for full editing",
+        description:
+          "Open the letter detail page when you need to revise the full draft instead of working from a shortened list view.",
+      },
+      {
+        title: "Searchable personal library",
+        description:
+          "Use the workspace search to find earlier application drafts quickly when you want to reuse a strong starting point.",
+      },
+    ],
+  },
+  pillars: {
+    title: "Why this works better than scattered cover letter files",
+    lead:
+      "The product is intentionally narrow: one personal workspace that helps you keep strong drafts close and older applications organized instead of buried in folders.",
+    items: [
+      {
+        title: "Truthful product boundary",
+        description:
+          "This is a manual drafting tool for personal letters, not a recruiter tool, auto-apply system, or AI job agent.",
+      },
+      {
+        title: "Personal ownership",
+        description:
+          "Protected routes and user-scoped records keep each person’s draft history private and separated.",
+      },
+      {
+        title: "Reusable draft history",
+        description:
+          "Search, favorite, and archive controls make it easier to return to earlier letters worth adapting for a new role.",
+      },
+      {
+        title: "Safe state changes",
+        description:
+          "Edit, favorite, archive, and restore flows stay simple and predictable without introducing hard-delete complexity in V1.",
+      },
+    ],
+  },
+  workflow: {
+    eyebrow: "How it works",
+    title: "Build a cover letter workspace you can return to with confidence",
+    lead:
+      "The workflow is designed around storing strong drafts once, revising them when needed, and keeping the workspace readable over time.",
+    steps: [
+      {
+        title: "Sign in and save a draft",
+        description:
+          "Open the protected workspace and create a cover letter record for the job or company you are targeting.",
+      },
+      {
+        title: "Refine the letter over time",
+        description:
+          "Use the detail route to revise the draft, mark it as important, or archive it when it is no longer active.",
+      },
+      {
+        title: "Search and reopen later",
+        description:
+          "Return to the workspace when you want to review earlier letters and reuse the strongest starting points.",
+      },
+    ],
+  },
+  showcase: {
+    eyebrow: "Current product shape",
+    title: "Built for personal drafting and reuse, not automated job applications",
+    description:
+      "The landing copy stays aligned to the verified implementation: Cover Letter Writer is a protected manual workspace for storing, editing, favoriting, archiving, and revisiting personal cover letter drafts.",
+    bullets: [
+      "Good fit for keeping role-specific drafts organized instead of spread across notes and documents",
+      "Centered on manual writing, personal revision, and reusable draft history",
+    ],
+    calloutLabel: "Freeze truth",
+    calloutValue: "Manual cover letter workspace",
+  },
+  finalCta: {
+    title: "Start building a cover letter library you can actually reuse",
+    description:
+      "Open the workspace, save the strong drafts worth keeping, and make the next application easier to start from a better base.",
+    primaryCta: {
+      label: Astro.locals.isAuthenticated ? "Open Workspace" : "Sign in to Open",
+      href: startHref,
+    },
+    secondaryCta: {
+      label: "Review Features",
+      href: "#features",
+      variant: "ghost",
+    },
+  },
+};
 ---
 
 <AppShell title={title} description={description}>
-  <section class="border-b border-white/10 bg-gradient-to-b from-slate-950 to-slate-900 py-20">
-    <AvContainer size="narrow">
-      <p class="mb-4 text-xs uppercase tracking-[0.2em] text-emerald-300/80">Career writing workspace</p>
-      <h1 class="text-4xl font-semibold text-white md:text-6xl">Write better cover letters with calm focus.</h1>
-      <p class="mt-6 max-w-2xl text-lg text-slate-300">
-        Keep every draft, refine each paragraph manually, and track your application-ready letters in one premium workspace.
-      </p>
-      <div class="mt-8 flex flex-wrap gap-3">
-        <AvButton href="/app">Open workspace</AvButton>
-        <AvButton href="https://ansiversa.com" variant="ghost">Explore Ansiversa</AvButton>
-      </div>
-    </AvContainer>
-  </section>
-
-  <section class="py-16">
-    <AvContainer size="narrow">
-      <div class="grid gap-6 md:grid-cols-3">
-        <article class="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-          <h2 class="text-lg font-medium text-white">Manual by design</h2>
-          <p class="mt-3 text-sm text-slate-300">Compose every line yourself with thoughtful structure for intro, body, closing, and notes.</p>
-        </article>
-        <article class="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-          <h2 class="text-lg font-medium text-white">Organized workflow</h2>
-          <p class="mt-3 text-sm text-slate-300">Track drafts, ready letters, favorites, and archived history with fast search and clean filters.</p>
-        </article>
-        <article class="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-          <h2 class="text-lg font-medium text-white">Built for focus</h2>
-          <p class="mt-3 text-sm text-slate-300">A clutter-free workspace aligned with Ansiversa premium standards and professional tone.</p>
-        </article>
-      </div>
-    </AvContainer>
-  </section>
+  <LandingPageStandard content={landingContent} />
 </AppShell>
